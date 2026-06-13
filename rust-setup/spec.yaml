@@ -1,0 +1,21 @@
+schemaVersion: "1"
+kind: "mixin"
+name: "rust-setup"
+
+# commands:
+#   install:
+#     - command: "curl -fsSL https://sh.rustup.rs -sSf | sh -s -- -y"
+commands:
+  install:
+    - user: "1000"
+      description: Install Rust stable
+      command: |
+        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | \
+          sh -s -- -y --default-toolchain stable --profile default
+
+network:
+  allowedDomains:
+    - "crates.io:443"
+    - "static.crates.io:443"
+    - "index.crates.io:443"
+    - "static.rust-lang.org:443"
