@@ -1,0 +1,50 @@
+schemaVersion: "1"
+kind: sandbox
+name: claude-rtk
+displayName: claude-rtk
+description: Claude code with rtk
+
+sandbox:
+  image: "docker/sandbox-templates:claude-code"
+  aiFilename: CLAUDE.md
+  entrypoint:
+    run: [claude, --dangerously-skip-permissions]
+
+commands:
+  install:
+    - command: "curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/refs/heads/master/install.sh | sh"
+      user: 1000
+      description: install rtk
+    - command: "rtk init -g"
+      user: 1000
+      description: initialize rtk
+    - command: |
+        set -e
+        printf '%s\n' '{
+          "hasCompletedOnboarding": true,
+          "projects": { "/": { "hasTrustDialogAccepted": true } }
+        }' > /home/agent/.claude.json
+        chown agent:agent /home/agent/.claude.json
+      user: "0"
+      description: Seed Claude onboarding/trust flags
+    - command: |
+        set -e
+        mkdir -p /home/agent/.claude
+        printf '%s\n' '{
+          "themeId": 1,
+          "apiKeyHelper": "echo proxy-managed"
+        }' > /home/agent/.claude/settings.json
+      user: "agent"
+      description: Seed Claude settings.json (theme + proxy-managed auth)
+
+network:
+  serviceDomains:
+    api.anthropic.com: anthropic
+    console.anthropic.com: anthropic
+  serviceAuth:
+    anthropic:
+      headerName: x-api-key
+      valueFormat: "%s"
+  allowedDomains:
+    - "claude.com:443"
+
